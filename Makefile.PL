@@ -24,9 +24,9 @@ BEGIN {
 ### Could not run guile-config --version : $!
 ###
 ### This module requires Guile version 1.5.0.  You do not appear to have 
-### Guile on your system at all!  Please download Guile 1.5.0 from:
+### Guile on your system at all!  Please download the latest Guile from:
 ###
-###    http://www.gnu.org/software/guile/anon-cvs.html
+###    http://www.gnu.org/software/guile/guile.html
 ###
 ###############################################################################
 EOD
@@ -43,7 +43,7 @@ EOD
 ### This module requires Guile version 1.5.0.  You appear to have an older
 ### version.  Please download a more recent version of Guile from:
 ###
-###    http://www.gnu.org/software/guile/anon-cvs.html
+###    http://www.gnu.org/software/guile/guile.html
 ###
 ###############################################################################
 EOD
@@ -52,8 +52,26 @@ EOD
   
   open(CONF, "guile-config compile|") or die "You have a broken guile-config - it ran \"guile-config --version\" just fine but won't do \"guile-config compile\" : $!";
   $line = <CONF>;
-  while($line =~ /\G-I(\S+)/g) {
-    my $dir = $1;
+  close CONF;
+  if (defined $line) {
+    while($line =~ /\G-I(\S+)/g) {
+      my $dir = $1;
+      next unless -e "$dir/libguile.h" and -d "$dir/libguile";
+      $include_dir = $dir;
+    }
+  }
+  if (not defined $include_dir && -f '/etc/ld.so.conf') {
+    open LDCONF, '/etc/ld.so.conf';
+    while (my $dir = <LDCONF>) {
+      chomp($dir);
+      $dir =~ s/\/lib/\/include/;
+      next unless -e "$dir/libguile.h" and -d "$dir/libguile";
+      $include_dir = $dir;
+    }
+    close LDCONF;
+  }
+  if (not defined $include_dir) {
+    my $dir = '/usr/include';
     next unless -e "$dir/libguile.h" and -d "$dir/libguile";
     $include_dir = $dir;
   }

@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 6 }
+BEGIN { plan tests => 7 }
 
 use Guile;
 
@@ -28,3 +28,19 @@ ok($pair2 and
 my $alist = Guile::SCM->new([ Guile::SCM->new(pair => [ foo => 1 ]),
                               Guile::SCM->new(pair => [ bar => 2 ]) ]);
 ok($alist->[0][1] == 1 and $alist->[1][1] == 2);
+
+# test we can arrayify a list without trying to SVify the contents
+my $list2 = Guile::eval_str("
+  (catch 'postback
+    (lambda ()
+      (+ 1 (call-with-current-continuation
+        (lambda (kont)
+          (throw 'postback kont)))))
+    (lambda (key kont)
+      (list 3 kont)))");
+
+my $lambda = Guile::eval_str("(lambda (k i) (k i))");
+
+my $contreturn = Guile::apply($lambda, [ $list2->[1], 2 ]);
+
+ok($list2->[0] == 3 and $contreturn == 3);

@@ -4,7 +4,7 @@ use 5.6.1;
 use strict;
 use warnings;
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use Carp qw(croak confess);
 use Data::Dumper;
@@ -223,23 +223,16 @@ modules.
 
 =head1 REQUIREMENTS
 
-This module has two rather aggressive requirements:
-
 =over 4
 
 =item 1) Perl 5.6.1
 
-I'll eventually test against older Perl versions but for now I'm only
-working with the latest and greatest.
+Might work with older versions, but don't count on it. Certainly not 5.005.
 
-=item 2) Guile 1.5.0
+=item 2) Guile 1.5.0+
 
-At the time of this writing Guile 1.5.0 hasn't even been released yet.
-You can only get it from CVS.  Details can be found at:
-
-   http://www.gnu.org/software/guile/anon-cvs.html
-
-I don't think this module will ever work with older Guile versions.
+Get the source from http://www.gnu.org/software/guile/guile.html if you can't
+find a package for your OS.
 
 =back 4
 
@@ -1603,6 +1596,8 @@ information.
 
 Sam Tregar, sam@tregar.com
 
+Co-maintained by Matt S Trout, perl-stuff@trout.me.uk
+
 =head1 SEE ALSO
 
 Inline
@@ -1610,7 +1605,7 @@ Inline
 =head1 LICENSE
 
 Guile : A Perl binding to the GNU Guile Interpreter.
-Copyright (C) 2001 Sam Tregar (sam@tregar.com)
+Copyright (C) 2001-2004 Sam Tregar (sam@tregar.com)
 
 This module is free software; you can redistribute it and/or modify it
 under the terms of either:

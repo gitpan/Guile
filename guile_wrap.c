@@ -170,8 +170,16 @@ SV * newSVscm (SCM scm) {
     // might make sense if Perl had car and cdr!
     if (gh_list_p(scm)) {
       AV *av = newAV();
+      SV* sv;
+      SCM tmp;
       do {
-        av_push(av, newSVscm(SCM_CAR(scm)));
+        // turn the elements into Guile::SCM objects since SVifying them
+        // will cause data loss
+        sv = newSV(0);
+        tmp = SCM_CAR(scm);
+        scm_gc_protect_object(tmp);
+        sv_setref_pv(sv, "Guile::SCM", (void*)tmp);
+        av_push(av, sv);
         scm = SCM_CDR(scm);
       } while(scm != SCM_EOL);      
       return newRV_noinc((SV*)av);
@@ -180,10 +188,22 @@ SV * newSVscm (SCM scm) {
     // pairs - check this after lists since a list is also a pair
     if (SCM_CONSP(scm)) {
       // create a two-element array with the CAR and CDR of the pair
+      // turn the elements into Guile::SCM objects since SVifying them
+      // will cause data loss
       AV *av = newAV();
+      SV* sv;
+      SCM tmp;
       av_extend(av, 1);
-      av_store(av, 0, newSVscm(SCM_CAR(scm)));
-      av_store(av, 1, newSVscm(SCM_CDR(scm)));
+      sv = newSV(0);
+      tmp = SCM_CAR(scm);
+      scm_gc_protect_object(tmp);
+      sv_setref_pv(sv, "Guile::SCM", (void*)tmp);
+      av_store(av, 0, sv);
+      sv = newSV(0);
+      tmp = SCM_CDR(scm);
+      scm_gc_protect_object(tmp);
+      sv_setref_pv(sv, "Guile::SCM", (void*)tmp);
+      av_store(av, 1, sv);
       return newRV_noinc((SV*)av);
     }
      
@@ -192,7 +212,7 @@ SV * newSVscm (SCM scm) {
       return newSVpvn(SCM_STRING_CHARS(scm),SCM_STRING_LENGTH(scm));
 
     // floats
-    if (scm_exact_p(scm)) 
+    if (scm_inexact_p(scm) == SCM_BOOL_T) 
       return newSVnv(gh_scm2double(scm));
 
     croak("Guile::newSVscm : Unknown non-immediate SCM type.");
